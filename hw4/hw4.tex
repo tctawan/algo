@@ -1,0 +1,152 @@
+\documentclass[a4paper, 12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{fancyhdr}
+\usepackage[margin = 1in]{geometry}
+\usepackage{listings}
+\usepackage{enumitem}
+
+\usepackage[margin = 1in]{geometry}
+\usepackage{color}
+
+\lstset{frame=tb,
+	language=Java,
+	aboveskip=3mm,
+	belowskip=3mm,
+	showstringspaces=false,
+	columns=flexible,
+	basicstyle={\small\ttfamily},
+	numbers=none,
+	numberstyle=\tiny\color{gray},
+	keywordstyle=\color{blue},
+	commentstyle=\color{dkgreen},
+	stringstyle=\color{mauve},
+	breaklines=true,
+	breakatwhitespace=true,
+	tabsize=3
+}
+\definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82}
+
+\newcommand{\question}[1] {\vspace{.25in} \hrule\vspace{0.5em}
+	\noindent{\bf #1} \vspace{0.5em}
+	\hrule \vspace{.10in}}
+\renewcommand{\part}[1] {\vspace{10pt} {\bf (#1)}}
+
+\setlength{\parindent}{0pt}
+\setlength{\parskip}{5pt plus 1pt}
+
+\pagestyle{fancyplain}
+\DeclareMathOperator{\maxx}{max}
+
+\begin{document}
+	\medskip
+	
+	\thispagestyle{plain}
+	\begin{center}
+		{\Large ICCS 313: Assignment 4} \\
+		Tawan Chaeyklinthes u5980963 \\
+		Date : 12 Nov 2018
+	\end{center}
+
+\question{Problem 1}
+
+Assuming that we have $P_0,P_1,...,P_k $ which indicates prices for the rod. Let $value(x)$ be the maximum value of a rod of length $x$. We can then write the recurrence as follows:
+
+\begin{equation*}
+	value(x)=\begin{cases}
+			0, & \text{if $x\leqslant 0$.}\\	
+			\underset{i \leqslant k }{max}(P_i + value(x-i) -cut(i,x)), & \text{if $x > 0$.}
+		\end{cases}	
+\end{equation*}
+
+Let $cut(i,x)$ be an indicator to whether or not are we cutting the rod. If we are cutting the rod, return $c$ ,otherwise, return 0.
+\begin{equation*}	
+	cut(i,x) = \begin{cases}
+	0 , & \text{if $i==x$.}\\
+	c, & \text{otherwise.}
+	\end{cases}
+\end{equation*}
+
+This can be translated into code as such:
+\begin{lstlisting}
+	def rod_cutting(n,P):
+		values = [0]*(n+1)
+		for x in range(1,n+1):
+			for i in range(len(P)):
+				val = values[x-i] + P[i]
+				if(i != x):
+					val -= c
+				values[x] = max(val,values[x])
+		return values[n] 
+		
+\end{lstlisting}
+
+\question{Problem 2}
+
+Let array $best\_seq[x]$ keep the best contiguous subsequence from elements index $0,1,...,x$.
+
+The algorithm is to keep track of the running sum while updating the $best\_seq$ .If the running sum is $< 0$, for instance at index $i$ , reset the sum.
+
+This can be written in code as follows:
+
+\begin{lstlisting}
+	def max_sequence(S):
+		best_seq = [-INF]
+		current_seq = []
+		sum = 0
+		for i in range(len(S)):
+			sum += S[i]
+			current_seq.append(S[i]) 
+			if(sum > sum(best_seq)):
+				best_seq = current_seq.copy()	
+			if(sum < 0):
+				sum = 0
+				current_seq = []	
+		return best_seq
+\end{lstlisting}
+
+\question{Problem 3}
+
+Let $longest\_p(i,j)$ be the function that gets the longest palindrome of range $i \text{ to } j$. We can write a recurrence relation as follows:
+
+\begin{equation*}
+	longest\_p(i,j) = \begin{cases}
+		\text{empty string}, & \text{if } i>j.\\
+		s[i], & \text{if } i == j.\\
+		longest\begin{cases}
+			longest\_p(i+1,j)\\
+			longest\_p(i,j-1)
+		\end{cases} + \underset{\text{if } s[i] == s[j]}{longest\_p(i+1,j-1)} , & \text{ otherwise.}
+	\end{cases}
+\end{equation*}
+
+This can be translated into codes as follow:
+
+\begin{lstlisting}
+	def longest_p(i,j):
+		if(i == j):
+			return s[i]
+		if(i > j):
+			return ""
+		if(memo[i][j] != null):
+			return memo[i][j]
+		else:
+			longest_palin_without_j = longest(i,j-1)
+			longest_palin_without_i = longest(i+1,j)
+			longest_palin = longest(longest_palin_without_j,
+									longest_palin_without_i)
+			if(s[i] == s[j]):
+				longest_palin = s[i] +longest(i+1,j-1) + s[j]
+			memo[i][j] = longest_palin
+			return longest_palin
+\end{lstlisting}
+
+There are $O(n^2)$ sub-problems and each costing $O(1)$. Therefore the total running time is $O(n^2)$.
+
+
+
+
+\end{document}
